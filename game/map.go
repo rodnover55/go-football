@@ -1,13 +1,13 @@
 package game
 
+
 type SimpleMap struct {
 	field Field
-	ballX int
-	ballY int
+	ballPosition Position
 }
 
-func (m SimpleMap) Position() (int, int) {
-	return m.ballX, m.ballY
+func (m SimpleMap) Position() Position {
+	return m.ballPosition
 }
 
 func NewMap(players []Player) Map {
@@ -31,8 +31,7 @@ func NewMap(players []Player) Map {
 
 	return &SimpleMap{
 		field: field,
-		ballX: 5,
-		ballY: 4,
+		ballPosition: Position{5, 4},
 	}
 }
 

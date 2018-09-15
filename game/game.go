@@ -1,6 +1,9 @@
 package game
 
-import "image/color"
+import (
+	"image/color"
+	"math"
+)
 
 type Game struct {
 	GameMap Map
@@ -24,11 +27,17 @@ const (
 	WIDTH = 11
 	HEIGHT = 9
 )
+
+type Position struct {
+	X int
+	Y int
+}
+
 type Field [HEIGHT][WIDTH]Cell
 
 type Map interface {
 	Field() Field
-	Position() (int, int)
+	Position() Position
 }
 
 func NewGame(gameMap Map, players []Player) *Game {
@@ -43,4 +52,14 @@ func NewGame(gameMap Map, players []Player) *Game {
 
 func (g Game) ActivePlayer() Player {
 	return g.activePlayer
+}
+
+// TODO: Покрыть тестами
+func (g Game) CanMove(p Position) bool {
+	m := g.GameMap
+	ball := m.Position()
+	field := m.Field()
+
+	return (math.Abs(float64(p.X - ball.X)) <= 1) && (math.Abs(float64(p.Y - ball.Y)) <= 1) &&
+		!field[p.Y][p.X].Filled
 }
