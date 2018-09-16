@@ -20,8 +20,8 @@ type GameScene struct {
 	game *game.Game
 	win  *pixelgl.Window
 
-	playersLabels Labels
-	canMove bool
+	playersLabels  Labels
+	canMove        bool
 	cursorPosition game.Position
 }
 
@@ -32,14 +32,15 @@ func (scene *GameScene) Update() {
 	scene.canMove = err == nil
 
 	scene.paintMap()
+	scene.paintFilled()
 	scene.paintPlayers()
 
-	if !scene.canMove {
+	if scene.canMove {
 		scene.paintPath()
 	}
 }
 
-func MakeGame(win *pixelgl.Window) *GameScene {
+func NewGame(win *pixelgl.Window) *GameScene {
 	ttf, err := truetype.Parse(goregular.TTF)
 	if err != nil {
 		panic(err)
@@ -74,8 +75,8 @@ func MakeGame(win *pixelgl.Window) *GameScene {
 	}
 
 	return &GameScene{
-		win:  win,
-		game: g,
+		win:           win,
+		game:          g,
 		playersLabels: labels,
 	}
 }
@@ -87,51 +88,69 @@ func (scene GameScene) paintPlayers() {
 }
 
 func (scene GameScene) paintMap() {
-	field := scene.game.GameMap.Field()
+	drawer := imdraw.New(nil)
+	drawer.Color = colornames.Gray
+
+	for x := 0; x < game.WIDTH; x += 1 {
+		drawLine(
+			drawer,
+			getCoord(game.Position{X: x, Y: 0}),
+			getCoord(game.Position{X: x, Y: game.HEIGHT - 1}),
+			false,
+		)
+	}
+
+	for y := 0; y < game.HEIGHT; y += 1 {
+		drawLine(
+			drawer,
+			getCoord(game.Position{X: 0, Y: y}),
+			getCoord(game.Position{X: game.WIDTH - 1, Y: y}),
+			false,
+		)
+	}
+
+	drawer.Draw(scene.win)
+}
+
+func (scene GameScene) paintFilled() {
+	m := scene.game.GameMap
 
 	drawer := imdraw.New(nil)
 	drawer.Color = colornames.White
 
 	for x := 0; x < game.WIDTH; x += 1 {
 		for y := 0; y < game.HEIGHT; y += 1 {
-			startCell := field[y][x]
+			startCell := m.Cell(game.Position{X: x, Y: y})
 
-			if y < game.HEIGHT-1 {
-				drawLine(
-					drawer,
-					getCoord(game.Position{x, y}),
-					getCoord(game.Position{x, y+1}),
-					startCell.Filled && field[y+1][x].Filled,
-				)
-			}
+			for _, cell := range startCell.Links() {
+				if (startCell.Position.X <= cell.Position.X) &&
+					(startCell.Position.Y <= cell.Position.Y) {
 
-			if x < game.WIDTH-1 {
-				drawLine(
-					drawer,
-					getCoord(game.Position{x, y}),
-					getCoord(game.Position{x+1, y}),
-					startCell.Filled && field[y][x+1].Filled,
-				)
+					drawLine(
+						drawer,
+						getCoord(startCell.Position),
+						getCoord(cell.Position),
+						true,
+					)
+				}
 			}
 		}
 	}
 
 	drawer.Color = colornames.White
-	drawer.Push(getCoord(scene.game.GameMap.Position()))
+	drawer.Push(getCoord(scene.game.Ball()))
 	drawer.Circle(2, 4.0)
 
 	drawer.Draw(scene.win)
 }
 
 func (scene GameScene) paintPath() {
-	ballPosition := getCoord(scene.game.GameMap.Position())
+	ballPosition := getCoord(scene.game.Ball())
 	position := getCoord(scene.cursorPosition)
 
 	drawer := imdraw.New(nil)
-	drawer.Color = colornames.Gray
 
-	drawer.Push(ballPosition, position)
-	drawer.Line(1)
+	drawLine(drawer, ballPosition, position, true)
 
 	drawer.Color = scene.game.ActivePlayer().Color()
 	drawer.Push(position)
@@ -142,7 +161,7 @@ func (scene GameScene) paintPath() {
 
 // TODO: Сделать методом GameScene и использовать координаты окна
 func getCoord(p game.Position) pixel.Vec {
-	return pixel.V(float64(30+40*p.X), float64(570 - 40*p.Y))
+	return pixel.V(float64(30+40*p.X), float64(570-40*p.Y))
 }
 
 func (scene GameScene) findNearestPoint(position pixel.Vec) (p game.Position, err error) {
@@ -151,7 +170,9 @@ func (scene GameScene) findNearestPoint(position pixel.Vec) (p game.Position, er
 		Y: int(math.Round((570.0 - position.Y) / 40.0)),
 	}
 
-	if scene.game.CanMove(p) {
+	if (p.X < 0) || (p.Y < 0) ||
+		(p.X >= game.WIDTH) || (p.Y >= game.HEIGHT) ||
+		!scene.game.CanMove(p) {
 		err = errors.New("can't move")
 	}
 

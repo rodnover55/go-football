@@ -1,42 +1,72 @@
 package game
 
+import "math"
 
 type SimpleMap struct {
 	field Field
-	ballPosition Position
 }
 
-func (m SimpleMap) Position() Position {
-	return m.ballPosition
+func (m SimpleMap) Cell(p Position) Cell {
+	return m.field[p.Y][p.X]
+}
+
+func (m *SimpleMap) cell(p Position) *Cell {
+	return &m.field[p.Y][p.X]
 }
 
 func NewMap(players []Player) Map {
-	f := Cell{true, nil}
-	o := Cell{false, nil}
-
-	l := Cell{false, players[0]}
-	r := Cell{false, players[1]}
+	f := Cell{Filled: true}
+	o := Cell{Filled: false}
 
 	field := Field{
 		{f, f, f, f, f, f, f, f, f, f, f},
 		{f, o, o, f, o, f, o, f, o, o, f},
 		{f, o, o, f, o, f, o, f, o, o, f},
 		{f, o, o, f, o, f, o, f, o, o, f},
-		{r, o, o, f, o, f, o, f, o, o, l},
+		{o, o, o, f, o, f, o, f, o, o, o},
 		{f, o, o, f, o, f, o, f, o, o, f},
 		{f, o, o, f, o, f, o, f, o, o, f},
 		{f, o, o, f, o, f, o, f, o, o, f},
 		{f, f, f, f, f, f, f, f, f, f, f},
 	}
 
-	return &SimpleMap{
+	m := &SimpleMap{
 		field: field,
-		ballPosition: Position{5, 4},
 	}
-}
+
+	middleHeight := int(math.Trunc(HEIGHT / 2))
+	m.cell(Position{WIDTH - 1, middleHeight}).Winner = players[0]
+	m.cell(Position{0, middleHeight}).Winner = players[1]
+
+	for x := 0; x < WIDTH; x += 1 {
+		for y := 0; y < HEIGHT; y += 1 {
+			position := Position{X: x, Y: y}
+			cell := m.cell(position)
+
+			cell.Position = position
+
+			if y < HEIGHT-1 {
+				toCell := m.cell(Position{X: x, Y: y + 1})
+
+				if cell.Filled && toCell.Filled {
+					cell.addLink(toCell)
+					toCell.addLink(cell)
+				}
+			}
+
+			if x < WIDTH-1 {
+				toCell := m.cell(Position{X: x + 1, Y: y})
+
+				if cell.Filled && toCell.Filled {
+					cell.addLink(toCell)
+					toCell.addLink(cell)
+				}
+			}
+		}
+	}
 
 
-func (m SimpleMap) Field() Field {
-	return m.field
+	return m
 }
+
 

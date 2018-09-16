@@ -21,7 +21,7 @@ func (launcher *Launcher) Run() {
 		win := window.New()
 
 		if launcher.scene == nil {
-			launcher.scene = scenes.MakeGame(win)
+			launcher.scene = scenes.NewGame(win)
 		}
 
 		for !win.Closed() {

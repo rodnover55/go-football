@@ -10,17 +10,13 @@ type Game struct {
 	Players []Player
 	activePlayer Player
 	turns int
+	ball Position
 }
 
 type Player interface {
 	Name() string
 	Color() color.RGBA
 	Wins() int
-}
-
-type Cell struct {
-	Filled bool
-	Winner Player
 }
 
 const (
@@ -36,8 +32,7 @@ type Position struct {
 type Field [HEIGHT][WIDTH]Cell
 
 type Map interface {
-	Field() Field
-	Position() Position
+	Cell(Position) Cell
 }
 
 func NewGame(gameMap Map, players []Player) *Game {
@@ -47,6 +42,7 @@ func NewGame(gameMap Map, players []Player) *Game {
 		Players: players,
 		activePlayer: players[0],
 		turns: 0,
+		ball: Position{5, 4},
 	}
 }
 
@@ -57,9 +53,13 @@ func (g Game) ActivePlayer() Player {
 // TODO: Покрыть тестами
 func (g Game) CanMove(p Position) bool {
 	m := g.GameMap
-	ball := m.Position()
-	field := m.Field()
+	ball := g.ball
+	ballCell := m.Cell(ball)
 
 	return (math.Abs(float64(p.X - ball.X)) <= 1) && (math.Abs(float64(p.Y - ball.Y)) <= 1) &&
-		!field[p.Y][p.X].Filled
+		!ballCell.Linked(m.Cell(p))
+}
+
+func (g Game) Ball() Position {
+	return g.ball
 }
