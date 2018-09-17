@@ -19,6 +19,7 @@ func (cell Cell) Linked(l Cell) bool {
 
 func (cell *Cell) addLink(link *Cell) {
 	cell.links = append(cell.links, link)
+	link.links = append(link.links, cell)
 }
 
 func (cell Cell) Links() []Cell {

@@ -8,6 +8,10 @@ type LocalPlayer struct {
 	wins int
 }
 
+func (p *LocalPlayer) Win() {
+	p.wins += 1
+}
+
 func (p LocalPlayer) Name() string {
 	return p.name
 }
@@ -23,4 +27,5 @@ func (p LocalPlayer) Wins() int {
 func NewPlayer(name string, color color.RGBA) Player {
 	return &LocalPlayer{name, color, 0}
 }
+
 

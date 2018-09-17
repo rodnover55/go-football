@@ -20,7 +20,11 @@ func (launcher *Launcher) Run() {
 	pixelgl.Run(func() {
 		win := window.New()
 
+		// TODO: Добавить обработку эвентов:
+		// - завершение игры (с перезагрузкой)
+		// - загрузка игры
 		if launcher.scene == nil {
+			// TODO: Грузить сцену с надписью Loading, а в фоне игру. По окончанию загрузки запускать эту сцену
 			launcher.scene = scenes.NewGame(win)
 		}
 

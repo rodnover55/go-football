@@ -6,6 +6,16 @@ type SimpleMap struct {
 	field Field
 }
 
+func (m *SimpleMap) Copy() Map {
+	return &SimpleMap{
+		field: m.field,
+	}
+}
+
+func (m *SimpleMap) AddLink(from Position, to Position) {
+	m.cell(from).addLink(m.cell(to))
+}
+
 func (m SimpleMap) Cell(p Position) Cell {
 	return m.field[p.Y][p.X]
 }
@@ -50,7 +60,6 @@ func NewMap(players []Player) Map {
 
 				if cell.Filled && toCell.Filled {
 					cell.addLink(toCell)
-					toCell.addLink(cell)
 				}
 			}
 
@@ -59,14 +68,10 @@ func NewMap(players []Player) Map {
 
 				if cell.Filled && toCell.Filled {
 					cell.addLink(toCell)
-					toCell.addLink(cell)
 				}
 			}
 		}
 	}
 
-
 	return m
 }
-
-

@@ -23,20 +23,40 @@ type GameScene struct {
 	playersLabels  Labels
 	canMove        bool
 	cursorPosition game.Position
+	path []game.Position
 }
 
 func (scene *GameScene) Update() {
 	position, err := scene.findNearestPoint(scene.win.MousePosition())
-
 	scene.cursorPosition = position
 	scene.canMove = err == nil
+
+	scene.checkActions()
 
 	scene.paintMap()
 	scene.paintFilled()
 	scene.paintPlayers()
+	scene.paintPath()
+	scene.paintBall()
+}
 
-	if scene.canMove {
-		scene.paintPath()
+func (scene *GameScene) checkActions() {
+	leftPressed := scene.win.JustPressed(pixelgl.MouseButtonLeft)
+
+	countPasses := len(scene.path)
+
+	switch {
+	case leftPressed && scene.canMove:
+		scene.move()
+		// TODO: Сделать оповещение о невозможности хода
+	case leftPressed && (countPasses > 0) && (scene.cursorPosition == scene.path[countPasses - 1]):
+		scene.game.Move(scene.path)
+
+		if winner := scene.game.Winner(); winner != nil {
+			fmt.Printf("Wins: %s", winner.Name())
+		}
+
+		scene.path = []game.Position{}
 	}
 }
 
@@ -123,8 +143,8 @@ func (scene GameScene) paintFilled() {
 			startCell := m.Cell(game.Position{X: x, Y: y})
 
 			for _, cell := range startCell.Links() {
-				if (startCell.Position.X <= cell.Position.X) &&
-					(startCell.Position.Y <= cell.Position.Y) {
+				if (startCell.Position.X < cell.Position.X) ||
+					(startCell.Position.Y < cell.Position.Y) {
 
 					drawLine(
 						drawer,
@@ -137,25 +157,52 @@ func (scene GameScene) paintFilled() {
 		}
 	}
 
-	drawer.Color = colornames.White
-	drawer.Push(getCoord(scene.game.Ball()))
-	drawer.Circle(2, 4.0)
-
 	drawer.Draw(scene.win)
 }
 
 func (scene GameScene) paintPath() {
-	ballPosition := getCoord(scene.game.Ball())
-	position := getCoord(scene.cursorPosition)
+	drawer := imdraw.New(nil)
+	drawer.Color = scene.game.ActivePlayer().Color()
+
+	var path []game.Position
+
+	if scene.canMove {
+		path = append(scene.path, scene.cursorPosition)
+	} else {
+		path = scene.path
+	}
+
+	from := getCoord(scene.game.Ball())
+
+	for _, p := range path {
+		to := getCoord(p)
+		drawer.Push(from, to)
+		from = to
+	}
+
+	drawer.Line(2.0)
+
+	drawer.Draw(scene.win)
+}
+
+func (scene GameScene) paintBall() {
+	var position game.Position
+
+	countPasses := len(scene.path)
+
+	switch {
+	case scene.canMove:
+		position = scene.cursorPosition
+	case countPasses > 0:
+		position = scene.path[countPasses - 1]
+	default:
+		position = scene.game.Ball()
+	}
 
 	drawer := imdraw.New(nil)
-
-	drawLine(drawer, ballPosition, position, true)
-
-	drawer.Color = scene.game.ActivePlayer().Color()
-	drawer.Push(position)
+	drawer.Color = colornames.White
+	drawer.Push(getCoord(position))
 	drawer.Circle(2, 4.0)
-
 	drawer.Draw(scene.win)
 }
 
@@ -172,8 +219,8 @@ func (scene GameScene) findNearestPoint(position pixel.Vec) (p game.Position, er
 
 	if (p.X < 0) || (p.Y < 0) ||
 		(p.X >= game.WIDTH) || (p.Y >= game.HEIGHT) ||
-		!scene.game.CanMove(p) {
-		err = errors.New("can't move")
+		!scene.game.CanMove(append(scene.path, p)) {
+		err = errors.New("can't step")
 	}
 
 	return p, err
@@ -191,4 +238,16 @@ func drawLine(drawer *imdraw.IMDraw, from pixel.Vec, to pixel.Vec, filled bool) 
 	drawer.Push(from, to)
 
 	drawer.Line(thickness)
+}
+
+func (scene *GameScene) move() error {
+	path := append(scene.path, scene.cursorPosition)
+
+	if !scene.game.CanMove(path) {
+		return errors.New("can't move")
+	}
+
+	scene.path = path
+
+	return nil
 }
