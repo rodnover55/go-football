@@ -1,0 +1,5 @@
+[description:"Добавить обработку эвентов" entry:"1537606136" modified:"1537606136" status:"pending" uuid:"db8e5518-b5c3-4887-9e9b-3e3c7457bc9c"]
+[description:"Сделать оповещение о невозможности хода" entry:"1537607019" modified:"1537607019" status:"pending" uuid:"fb1ec1d5-049d-4c5f-a0d9-14e8beacc5ec"]
+[description:"Сделать методом GameScene и использовать координаты окна" entry:"1537607060" modified:"1537607060" priority:"L" status:"pending" uuid:"b260d629-dd4d-49f4-b3b6-543705d119e3"]
+[description:"Добавить проверки, что игроков не может быть < 2" entry:"1537607123" modified:"1537607123" status:"pending" uuid:"ae4834ac-62a0-41cc-96ad-6a42ffea5240"]
+[description:"При завершении хода добавить проверку о правильности пути" entry:"1537607143" modified:"1537607143" status:"pending" uuid:"8d266bab-9a3c-4a73-920f-a85e25e54d84"]

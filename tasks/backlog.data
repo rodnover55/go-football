@@ -1,0 +1,7 @@
+{"description":"Добавить обработку эвентов","entry":"20180922T084856Z","modified":"20180922T084856Z","status":"pending","uuid":"db8e5518-b5c3-4887-9e9b-3e3c7457bc9c"}
+{"description":"Сделать оповещение о невозможности хода","entry":"20180922T090339Z","modified":"20180922T090339Z","status":"pending","uuid":"fb1ec1d5-049d-4c5f-a0d9-14e8beacc5ec"}
+{"description":"Сделать методом GameScene и использовать координаты окна prority:L","entry":"20180922T090356Z","modified":"20180922T090356Z","status":"pending","uuid":"23e8b1f6-9be6-4e71-960e-700afdaae2a1"}
+{"description":"Сделать методом GameScene и использовать координаты окна","entry":"20180922T090420Z","modified":"20180922T090420Z","priority":"L","status":"pending","uuid":"b260d629-dd4d-49f4-b3b6-543705d119e3"}
+{"description":"Сделать методом GameScene и использовать координаты окна prority:L","end":"20180922T090429Z","entry":"20180922T090356Z","modified":"20180922T090431Z","status":"deleted","uuid":"23e8b1f6-9be6-4e71-960e-700afdaae2a1"}
+{"description":"Добавить проверки, что игроков не может быть < 2","entry":"20180922T090523Z","modified":"20180922T090523Z","status":"pending","uuid":"ae4834ac-62a0-41cc-96ad-6a42ffea5240"}
+{"description":"При завершении хода добавить проверку о правильности пути","entry":"20180922T090543Z","modified":"20180922T090543Z","status":"pending","uuid":"8d266bab-9a3c-4a73-920f-a85e25e54d84"}
